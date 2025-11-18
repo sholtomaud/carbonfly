@@ -1,0 +1,10 @@
+/* Navigation */
+.wy-side-nav-search{
+    background-color: rgb(237,240,240);
+}
+
+/* logo */
+.wy-side-nav-search>a img.logo {
+    width: 160px;
+    height: auto;
+}

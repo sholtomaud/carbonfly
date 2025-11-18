@@ -6,13 +6,21 @@
 Carbonfly documentation
 =======================
 
+**Version:** |release|
+
 .. include:: introduction.rst
 
 .. toctree::
    :maxdepth: 4
-   :caption: Contents:
+   :caption: GETTING STARTED:
 
-   modules
+   tutorials
+
+.. toctree::
+   :maxdepth: 4
+   :caption: DOCUMENTATION:
+
+   api
 
 Indices and tables
 ==================

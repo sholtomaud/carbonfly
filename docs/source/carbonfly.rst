@@ -11,6 +11,7 @@ Subpackages
 
 .. toctree::
    :maxdepth: 4
+   :hidden:
 
    carbonfly.pythermalcomfort
 
@@ -19,6 +20,7 @@ Submodules
 
 .. toctree::
    :maxdepth: 4
+   :hidden:
 
    carbonfly.blockmesh_writer
    carbonfly.boundary

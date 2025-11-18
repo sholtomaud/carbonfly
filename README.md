@@ -129,6 +129,12 @@ See [Examples](./examples)
 
 ## Documentation
 
+### Python library
+
+See [Carbonfly GitHub Pages](https://rwth-e3d.github.io/carbonfly/)
+
+### Grasshopper Toolbox
+
 See [Documentation](./documentation)
 
 ## Instructions for Developers & FAQs
