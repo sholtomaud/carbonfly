@@ -3,8 +3,10 @@
 <!-- TOC -->
 * [Instructions for Developers](#instructions-for-developers)
   * [Python library](#python-library)
+    * [Documentation](#documentation)
     * [Structure](#structure)
   * [Grasshopper toolbox](#grasshopper-toolbox)
+    * [Documentation](#documentation-1)
     * [Structure](#structure-1)
   * [FAQ](#faq)
     * [Q1: Does Carbonfly support other OpenFOAM versions, such as v8, for use with urbanMicroclimateFoam?](#q1-does-carbonfly-support-other-openfoam-versions-such-as-v8-for-use-with-urbanmicroclimatefoam)
@@ -34,7 +36,12 @@ carbonfly (GitHub Repo)/
 └─ README.md               # README
 ```
 
+
 ## Python library
+
+### Documentation
+
+[Python Library Documentation](https://rwth-e3d.github.io/carbonfly/)
 
 ### Structure
 
@@ -71,6 +78,10 @@ carbonfly/
 [Back to top ↥](#instructions-for-developers)
 
 ## Grasshopper toolbox
+
+### Documentation
+
+[Grasshopper Toolbox Documentation](https://github.com/RWTH-E3D/carbonfly/tree/master/documentation)
 
 ### Structure
 

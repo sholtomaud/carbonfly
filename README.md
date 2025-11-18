@@ -131,11 +131,11 @@ See [Examples](./examples)
 
 ### Python library
 
-See [Carbonfly GitHub Pages](https://rwth-e3d.github.io/carbonfly/)
+See [Python Library Documentation](https://rwth-e3d.github.io/carbonfly/)
 
 ### Grasshopper Toolbox
 
-See [Documentation](./documentation)
+See [Grasshopper Toolbox Documentation](./documentation)
 
 ## Instructions for Developers & FAQs
 

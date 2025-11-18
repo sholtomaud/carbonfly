@@ -3,17 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Carbonfly documentation
-=======================
+Carbonfly Python library
+========================
 
 **Version:** |release|
 
 .. include:: introduction.rst
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :caption: GETTING STARTED:
 
+   installation
    tutorials
 
 .. toctree::
@@ -21,6 +22,7 @@ Carbonfly documentation
    :caption: DOCUMENTATION:
 
    api
+
 
 Indices and tables
 ==================
