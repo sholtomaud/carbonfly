@@ -188,3 +188,9 @@ If you want to cite **Carbonfly** in your academic work, there are two ways to d
   Coming soon...
 
 [Back to top ↥](#quick-navigation)
+
+## Contributors
+
+<a href="https://github.com/RWTH-E3D/carbonfly/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=RWTH-E3D/carbonfly" />
+</a>
