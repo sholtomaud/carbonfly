@@ -234,14 +234,20 @@ def wind_pressure_en1991(
         zone: External pressure zones, A/B/C on side/roof edges along the flow, D windward face, and E leeward face.
             Schematic (Fig. 7.5) see Notes.
         terrain: terrain type, 0/1/2/3/4, default: 4, corresponding to Type 0/I/II/III/IV:
+
             0: Sea, coastal area exposed to the open sea.
+
             1: Lakes or area with negligible vegetation and without obstacles.
+
             2: Area with low vegetation such as grass and isolated obstacles (trees, buildings) with separations of
                 at least 20 obstacle heights.
+
             3: Area with regular cover of vegetation or buildings or with isolated obstacles with separations of
                 maximum 20 obstacle heights (such as villages, suburban terrain, permanent forest).
+
             4: Area in which at least 15 % of the surface is covered with buildings and their average height
                 exceeds 15 m.
+
         c_dir: directional factor, for various wind directions may be found in the National Annex.
             The recommended value is 1.0.
         c_season: season factor, may be given in the National Annex. The recommended value is 1.0.

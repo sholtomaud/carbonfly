@@ -65,50 +65,50 @@ def iaq_co2(
 
     Notes:
         - EN: European standard CEN/EN 16798-1, based on german version DIN EN 16798-1:2019 (Page 55).
-        Evaluation based on CO2 concentration differences between indoors and outdoors.
-            - [Index = 1] Category I: delta(CO2) <= 550 ppm
-            - [Index = 2] Category II: delta(CO2) <= 800 ppm
-            - [Index = 3] Category III: delta(CO2) <= 1350 ppm
-            - [Index = 4] Category IV: delta(CO2) > 1350 ppm
+            Evaluation based on CO2 concentration differences between indoors and outdoors.
+                - [Index = 1] Category I: delta(CO2) <= 550 ppm
+                - [Index = 2] Category II: delta(CO2) <= 800 ppm
+                - [Index = 3] Category III: delta(CO2) <= 1350 ppm
+                - [Index = 4] Category IV: delta(CO2) > 1350 ppm
 
         - LEHB: Japanese law for environmental health in buildings (LEHB).
-        Evaluation based on CO2 concentration indoors.
-            - [Index = 1] Acceptable: CO2 <= 1000 ppm
-            - [Index = 2] Unacceptable: CO2 > 1000 ppm
+            Evaluation based on CO2 concentration indoors.
+                - [Index = 1] Acceptable: CO2 <= 1000 ppm
+                - [Index = 2] Unacceptable: CO2 > 1000 ppm
 
         - SS: Singapore standard SS 554:2016 (Page 22).
-        Evaluation based on CO2 concentration differences between indoors and outdoors.
-            - [Index = 1] Acceptable: delta(CO2) <= 700 ppm
-            - [Index = 2] Unacceptable: delta(CO2) > 700 ppm
+            Evaluation based on CO2 concentration differences between indoors and outdoors.
+                - [Index = 1] Acceptable: delta(CO2) <= 700 ppm
+                - [Index = 2] Unacceptable: delta(CO2) > 700 ppm
 
         - HK: Hong Kong Environmental Protection Department.
-        "Hongkong Guidance Notes for the Management of Indoor Air Quality in Offices and Public Places" (Page 17).
-        Evaluation based on CO2 concentration indoors (averaging time 8-hour). Here the average is changed
-        to an instantaneous evaluation for each measurment.
-            - [Index = 1] Excellent Class: CO2 <= 800 ppm
-            - [Index = 2] Good Class: CO2 <= 1000 ppm
-            - [Index = 3] Unacceptable: CO2 > 1000 ppm
+            "Hongkong Guidance Notes for the Management of Indoor Air Quality in Offices and Public Places" (Page 17).
+            Evaluation based on CO2 concentration indoors (averaging time 8-hour). Here the average is changed
+            to an instantaneous evaluation for each measurment.
+                - [Index = 1] Excellent Class: CO2 <= 800 ppm
+                - [Index = 2] Good Class: CO2 <= 1000 ppm
+                - [Index = 3] Unacceptable: CO2 > 1000 ppm
 
         - UBA: German environmental protection agency (Umweltbundesamt).
-        "Gesundheitsschutz 11-2008: Gesundheitliche Bewertung von Kohlendioxid in der Innenraumluft" (Page 1368).
-        Evaluation based on CO2 concentration indoors.
-            - [Index = 1] Hygienically safe: CO2 < 1000 ppm
-            - [Index = 2] Hygienically conspicuous: CO2 <= 2000 ppm
-            - [Index = 3] Hygienically unacceptable: CO2 > 2000 ppm
+            "Gesundheitsschutz 11-2008: Gesundheitliche Bewertung von Kohlendioxid in der Innenraumluft" (Page 1368).
+            Evaluation based on CO2 concentration indoors.
+                - [Index = 1] Hygienically safe: CO2 < 1000 ppm
+                - [Index = 2] Hygienically conspicuous: CO2 <= 2000 ppm
+                - [Index = 3] Hygienically unacceptable: CO2 > 2000 ppm
 
         - DOSH: Department of Occupational Safety and Health (DOSH) Malaysia.
-        "Industry Code of Practice on Indoor Air Quality 2010 (ICOP IAQ 2010)."
-        Evaluation based on CO2 concentration indoors.
-            - [Index = 1] Acceptable: CO2 <= 1000 ppm
-            - [Index = 2] Unacceptable: CO2 > 1000 ppm
+            "Industry Code of Practice on Indoor Air Quality 2010 (ICOP IAQ 2010)."
+            Evaluation based on CO2 concentration indoors.
+                - [Index = 1] Acceptable: CO2 <= 1000 ppm
+                - [Index = 2] Unacceptable: CO2 > 1000 ppm
 
         - NBR: Brazilian standard ABNT NBR 16401-3:2008
             "Air-conditioning installations – Central and unitary systems – Part 3: Indoor air quality"
             and ABNT NBR 17037:2023
             "Indoor air quality in artificially heated non-residential environments – Referential standards"
-        Evaluation based on CO2 concentration differences between indoors and outdoors.
-            - [Index = 1] Acceptable: delta(CO2) <= 700 ppm
-            - [Index = 2] Unacceptable: delta(CO2) > 700 ppm
+            Evaluation based on CO2 concentration differences between indoors and outdoors.
+                - [Index = 1] Acceptable: delta(CO2) <= 700 ppm
+                - [Index = 2] Unacceptable: delta(CO2) > 700 ppm
     """
     standards = ["EN", "LEHB", "SS", "HK", "UBA", "DOSH", "NBR"]
     if standard not in standards:

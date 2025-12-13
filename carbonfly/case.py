@@ -155,7 +155,7 @@ def build_case(
     """
     Build an OpenFOAM case folder structure and write key dictionaries/fields.
 
-    High-level steps:
+    Steps:
         1) Mesh each CFGeo.brep and export a multi-solid ASCII STL.
         2) Optionally write `system/blockMeshDict`.
         3) Optionally write `system/surfaceFeaturesDict` and `system/snappyHexMeshDict`.
@@ -180,7 +180,8 @@ def build_case(
         internal_G: Optional internalField for G.
         internal_Ydefault: Optional internalField for Ydefault.
         write_blockmesh (bool): If True, write `system/blockMeshDict`.
-        padding_m (float): Extra margin (in meters) added around the union of all CFGeo bounding boxes when computing the blockMesh domain extents.
+        padding_m (float): Extra margin (in meters) added around the union of all CFGeo bounding boxes
+            when computing the blockMesh domain extents.
         cell_size_m (float): Target cell size (m) used to derive blockMesh cell counts.
         write_snappy (bool): If True, write snappyHexMesh-related dictionaries.
         snap (bool): `snap` switch in snappyHexMeshDict.
