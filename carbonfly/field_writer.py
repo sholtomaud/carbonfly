@@ -1,7 +1,6 @@
-from __future__ import annotations
 """
 carbonfly
-    a lightweight, easy-to-use Python API and 
+    a lightweight, easy-to-use Python API and
     toolbox for indoor CO2 CFD simulations in Grasshopper
     based on OpenFOAM and WSL
 
@@ -10,26 +9,36 @@ carbonfly
 - Website: https://github.com/RWTH-E3D/carbonfly
 """
 
+from __future__ import annotations
+
 # carbonfly/field_writer.py
 from pathlib import Path
 from typing import Dict, Iterable, Optional, Tuple, Any
 from .utils import foam_header
 
+
 # Utilities
 def _is_vec3(v: Any) -> bool:
+    """Return True if v looks like a 3D vector (len == 3)."""
     return isinstance(v, (list, tuple)) and len(v) == 3
+
 
 def _default_dimensions(field_name: str) -> str:
     """
-    Provide sensible default dimensions for common fields.
-    You can override per call with the 'dimensions' parameter in write_0_field().
+    Return default OpenFOAM dimensions string for common fields.
+
+    Args:
+        field_name (str): Field name (e.g., "U", "T", "p", "CO2").
+
+    Returns:
+        str: OpenFOAM dimensions string.
     """
     fn = field_name.strip()
-    if fn == "U":   # velocity [m s^-1]
+    if fn == "U":  # velocity [m s^-1]
         return "[0 1 -1 0 0 0 0]"
-    if fn == "T":   # temperature [K]
+    if fn == "T":  # temperature [K]
         return "[0 0 0 1 0 0 0]"
-    if fn == "p":   # pressure [Pa]
+    if fn == "p":  # pressure [Pa]
         return "[1 -1 -2 0 0 0 0]"
     if fn == "p_rgh":
         return "[1 -1 -2 0 0 0 0]"
@@ -47,11 +56,32 @@ def _default_dimensions(field_name: str) -> str:
     # CO2 or other passive scalar (dimensionless by default)
     return "[0 0 0 0 0 0 0]"
 
+
 def _write_value_line(prefix: str, v: Any) -> str:
+    """Render a single OpenFOAM entry line for common boundary condition keys.
+
+    Note:
+        For some keys (e.g., value, inletValue, p0), OpenFOAM usually expects
+        `uniform` for scalar/vector literals. String values are written as-is.
+
+    Args:
+        prefix (str): Dictionary key (e.g., "value", "inletValue").
+        v (Any): Value (scalar, vec3, or OpenFOAM token/string).
+
+    Returns:
+        str: One formatted line (with indentation) ending in ';'.
     """
-    Helper function for writing values. If it's in _FIELD_VALUE_KEYS, add `uniform` prefix.
-    """
-    _FIELD_VALUE_KEYS = {"value", "inletValue", "outletValue", "initialValue", "emissivity", "h", "Ta", "q", "p0"}
+    _FIELD_VALUE_KEYS = {
+        "value",
+        "inletValue",
+        "outletValue",
+        "initialValue",
+        "emissivity",
+        "h",
+        "Ta",
+        "q",
+        "p0",
+    }
     key = prefix.strip()
 
     if _is_vec3(v):
@@ -64,9 +94,18 @@ def _write_value_line(prefix: str, v: Any) -> str:
 
     return f"        {prefix} uniform 0;"
 
+
 def _field_block_text(spec: Any) -> str:
     """
-    Render a boundary field spec (expects a .to_dict() like carbonfly.boundary.FieldFV/ZG/InletOutlet).
+    Render a patchField block from a spec object.
+
+    Expects `spec` to provide `to_dict()` compatible with carbonfly.boundary.Field*.
+
+    Args:
+        spec (Any): Field spec object with `to_dict()`.
+
+    Returns:
+        str: Multi-line text for the patch block (indented for insertion).
     """
     d = spec.to_dict()
     typ = d.get("type")
@@ -92,7 +131,7 @@ def _field_block_text(spec: Any) -> str:
     elif typ == "turbulentIntensityKineticEnergyInlet":
         lines.append(_write_value_line("intensity", 0.14))
         lines.append(_write_value_line("value", d.get("value")))
-    
+
     elif typ == "MarshakRadiation":
         lines.append(_write_value_line("emissivityMode", "lookup"))
         lines.append(_write_value_line("emissivity", 0.98))
@@ -108,7 +147,7 @@ def _field_block_text(spec: Any) -> str:
     elif typ == "pressureInletOutletVelocity":
         lines.append(_write_value_line("inletValue", d.get("inletValue")))
         lines.append(_write_value_line("value", d.get("value")))
-    
+
     elif typ == "externalWallHeatFluxTemperature":
         lines.append(_write_value_line("mode", "coefficient"))
         lines.append(_write_value_line("h", d.get("h")))
@@ -124,14 +163,22 @@ def _field_block_text(spec: Any) -> str:
         for cl in code_block.splitlines():
             lines.append("        " + cl)
 
-
     # zeroGradient requires no extra keys
     return "\n".join(lines)
 
-def _infer_internal_from_patches(patch_specs: Dict[str, Any], field_name: str) -> Optional[Any]:
+
+def _infer_internal_from_patches(
+    patch_specs: Dict[str, Any], field_name: str
+) -> Optional[Any]:
     """
-    Try to infer a reasonable internalField from the first available patch spec for this field.
-    For vectors, returns (x,y,z); for scalars, returns a number. Returns None if not inferable.
+    Infer an internalField value from the first available patch spec.
+
+    Args:
+        patch_specs (Dict[str, Any]): Mapping patch_name -> spec.
+        field_name (str): Field name (currently unused; reserved for future rules).
+
+    Returns:
+        Optional[Any]: Inferred value (scalar or vec3), or None if not inferable.
     """
     for spec in patch_specs.values():
         if spec is None:
@@ -155,26 +202,23 @@ def write_0_field(
     patch_specs: Dict[str, Any],
     *,
     dimensions: Optional[str] = None,
-    infer_internal_when_none: bool = False
+    infer_internal_when_none: bool = False,
 ) -> Path:
     """
     Write a single field file under 0/ (e.g. 0/U, 0/T, 0/CO2 ...).
 
     Args:
-        case_root:  Case root path.
-        field_name: Field name, e.g. 'U', 'T', 'CO2'...
-        internal_value: Internal field value.
-                       - For vectors: (x, y, z)
-                       - For scalars: float/int
-                       - If None and infer_internal_when_none=True, it will be inferred from patch_specs when possible.
-        patch_specs: Mapping patch_name -> field spec object.
-        dimensions:  Override dimensions string, e.g. "[0 1 -1 0 0 0 0]". If None, use defaults by name.
-        infer_internal_when_none: Try to infer internal value from first available patch spec if not provided.
+        case_root (Path): Case root path.
+        field_name (str): Field name (e.g., "U", "T", "CO2").
+        internal_value (Any, optional): Internal field value (scalar or vec3).
+        patch_specs (Dict[str, Any]): Mapping patch_name -> field spec object.
+        dimensions (str, optional): Override dimensions string. If None, uses defaults by name.
+        infer_internal_when_none (bool): If True and internal_value is None, infer from patch specs.
 
     Returns:
-        Path to the written 0/<field_name> file.
+        Path: Path to the written `0/<field_name>` file.
     """
-    is_vec = (field_name == "U")
+    is_vec = field_name == "U"
     out = Path(case_root) / "0" / field_name
     out.parent.mkdir(parents=True, exist_ok=True)
 
@@ -198,7 +242,7 @@ def write_0_field(
         if field_name == "U":
             internal_value = (0.0, 0.0, 0.0)
         elif field_name == "T":
-            internal_value = 295.15     # 22 degC
+            internal_value = 295.15  # 22 degC
         elif field_name == "p":
             internal_value = 1e5
         elif field_name == "epsilon":
@@ -209,7 +253,9 @@ def write_0_field(
             internal_value = 0.0
 
     if is_vec and _is_vec3(internal_value):
-        lines.append(f"internalField   uniform ({internal_value[0]} {internal_value[1]} {internal_value[2]});")
+        lines.append(
+            f"internalField   uniform ({internal_value[0]} {internal_value[1]} {internal_value[2]});"
+        )
     else:
         lines.append(f"internalField   uniform {internal_value};")
 
@@ -235,26 +281,28 @@ def write_fields_batch(
     internal_values: Optional[Dict[str, Any]] = None,
     *,
     dimensions_map: Optional[Dict[str, str]] = None,
-    infer_internal_when_none: bool = False
+    infer_internal_when_none: bool = False,
 ) -> Dict[str, Path]:
     """
     Convenience function to write multiple 0/ field files at once.
 
     Args:
-        case_root:  Case root path.
-        fields:     Mapping field_name -> (mapping patch_name -> spec)
-                    Example:
-                        {
-                        "U":   {"inlet": FieldFV((0,0,-1)), "wall": FieldFV((0,0,0))},
-                        "T":   {"inlet": FieldFV(293.15),   "wall": FieldZG()},
-                        "CO2": {"inlet": FieldFV(4.5e-4)}
-                        }
-        internal_values:    Optional mapping field_name -> internal value.
-        dimensions_map:     Optional mapping field_name -> dimensions string.
-        infer_internal_when_none:   If internal value is missing, try inferring from patch specs.
+        case_root (Path): Case root path.
+        fields (Dict[str, Dict[str, Any]]): Mapping field_name -> (patch_name -> spec).
+        internal_values (Dict[str, Any], optional): Mapping field_name -> internalField value.
+        dimensions_map (Dict[str, str], optional): Mapping field_name -> dimensions string.
+        infer_internal_when_none (bool): If True, infer internal values when missing.
+
+    Example:
+        fields = {
+            "U": {"inlet": FieldFV((0, 0, -1)), "wall": FieldFV((0, 0, 0))},
+            "T": {"inlet": FieldFV(293.15), "wall": FieldZG()},
+            "CO2": {"inlet": FieldFV(4.5e-4)},
+        }
+        write_fields_batch(case_root, fields)
 
     Returns:
-        Dict mapping field_name -> Path written.
+        Dict[str, Path]: Mapping field_name -> written file path.
     """
     paths: Dict[str, Path] = {}
     internal_values = internal_values or {}
@@ -267,7 +315,7 @@ def write_fields_batch(
             internal_value=internal_values.get(field_name),
             patch_specs=patch_specs,
             dimensions=dimensions_map.get(field_name),
-            infer_internal_when_none=infer_internal_when_none
+            infer_internal_when_none=infer_internal_when_none,
         )
 
     return paths

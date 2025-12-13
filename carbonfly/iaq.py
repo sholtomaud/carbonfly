@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 """
 carbonfly
-    a lightweight, easy-to-use Python API and 
+    a lightweight, easy-to-use Python API and
     toolbox for indoor CO2 CFD simulations in Grasshopper
     based on OpenFOAM and WSL
 
@@ -11,53 +9,59 @@ carbonfly
 - Website: https://github.com/RWTH-E3D/carbonfly
 """
 
+from __future__ import annotations
+
 # carbonfly/iaq.py
 """
 Indoor Air Quality (IAQ) evaluation based on international standards.
 """
 
-from typing import Union, List
+from typing import Union, List, Tuple, Dict, Any
 
 
 def iaq_co2(
     co2_indoor: Union[float, int, List[float], List[int]],
     co2_outdoor: Union[float, int, List[float], List[int]] = 400,
     standard: str = "EN",
-) -> tuple:
+) -> Tuple[Dict[str, Any], List[int]]:
     """
-    Calculate CO2-based Indoor Air Quality (IAQ) indices based on different standards.
+    Calculate CO2-based Indoor Air Quality (IAQ) indices according to selected standards.
 
     Warnings:
-        CO2 is only suitable for assessing IAQ as an **indirect** proxy indicator of ventilation rate.
-        The assessment should be made aware of the following limitations:
-        1. CO2 below the threshold does not ensure an acceptable overall IAQ, but an excessively high CO2
-        may indicate that the room is not well ventilated, e.g. the ventilation system is not functioning
-        correctly or the windows are closed for a long period of time.
-        2. The direct impact of CO2 on health, well-being, and performance is still controversial.
-        At the same time CO2 should not be used directly as a direct indicator of the risk of disease transmission,
-        but should only be considered as an indirect indicator of ventilation rates.
-        3. CO2 measurements are greatly influenced by the accuracy of the sensor, its installation location
-        and calibration method.
-        Therefore, ASHRAE does not have a CO2-based IAQ index, see:
-        Persily A. 2020. Quit Blaming ASHRAE Standard 62.1 for 1000 ppm CO2, Indoor Air 2020 - The 16th Conference of
-        the Internatinal Society of Indoor Air Quality & Climate.
+        CO2 is only suitable for assessing IAQ as an **indirect** proxy indicator
+        of ventilation rate. The assessment should be made aware of the following
+        limitations:
+
+        1. CO2 below the threshold does not ensure an acceptable overall IAQ.
+           Conversely, excessively high CO2 may indicate insufficient ventilation
+           (e.g., malfunctioning mechanical ventilation or closed windows).
+        2. The direct impact of CO2 on health, well-being, and performance is still
+           controversial. CO2 should not be used as a direct indicator for disease
+           transmission risk, but only as an indirect indicator of ventilation rate.
+        3. CO2 measurements are strongly influenced by sensor accuracy, installation
+           location, and calibration method. Therefore, ASHRAE does not define a
+           CO2-based IAQ index; see:
+           Persily A. 2020. Quit Blaming ASHRAE Standard 62.1 for 1000 ppm CO2,
+           Indoor Air 2020 - The 16th Conference of the International Society of
+           Indoor Air Quality & Climate.
 
     Args:
-        co2_indoor: float, int or 1d array-like, support numpy array or pandas series
-            CO2 concentration indoors in ppm.
-
-        co2_outdoor: float, int or 1d array-like, support numpy array or pandas series, default=400
-            CO2 concentration outdoors in ppm.
-
-        standard: str
-            standard applied for evaluation, support "EN", "LEHB", "SS", "HK", "UBA", "DOSH", "NBR", see Notes.
+        co2_indoor (float | int | list[float] | list[int]): Indoor CO2 concentration(s) in ppm.
+            Supported: float/int or list of float/int.
+        co2_outdoor (float | int | list[float] | list[int]): Outdoor CO2 concentration(s) in ppm.
+            Supported: float/int or list of float/int. If a list is given, it must
+            have the same length as co2_indoor. Default is 400.
+        standard (str): Standard code for evaluation. Supported: "EN", "LEHB", "SS",
+            "HK", "UBA", "DOSH", "NBR" (see Notes).
 
     Returns:
-        report: dict
-            IAQ report as dictionary, includes calculated 'indices' / applied 'standard'
-            raw data indoors 'co2_indoor' / outdoors 'co2_outdoor'.
-        indices: list
-            IAQ indices, see Notes.
+        tuple[dict, list[int]]: (report, indices)
+            report (dict): IAQ report as a dictionary with keys:
+                - "indices": list[int]
+                - "standard": str
+                - "co2_indoor": original input
+                - "co2_outdoor": original input
+            indices (list[int]): IAQ indices (same as report["indices"]).
 
     Notes:
         - EN: European standard CEN/EN 16798-1, based on german version DIN EN 16798-1:2019 (Page 55).
@@ -188,13 +192,11 @@ def _iaq_co2_en(co2_indoor: Union[float, int], co2_outdoor: Union[float, int]) -
     Helper function to calculate IAQ index for a single measurement based on CEN/EN 16798-1.
 
     Args:
-        co2_indoor : float or int
-            single data point of CO2 concentration indoors in ppm.
-        co2_outdoor : float or int
-            single data point of CO2 concentration outdoors in ppm.
+        co2_indoor (float | int): single data point of CO2 concentration indoors in ppm.
+        co2_outdoor (float | int): single data point of CO2 concentration outdoors in ppm.
 
     Returns:
-        index : int
+        index (int):
             single IAQ index, range 1 (best) - 4 (worst), corresponds to categories I-IV in EN 16798-1.
     """
     delta_co2 = co2_indoor - co2_outdoor
@@ -215,11 +217,10 @@ def _iaq_co2_hk(co2_indoor: Union[float, int]) -> int:
     Helper function to calculate IAQ index for a single measurement based on Hongkong EPD standard.
 
     Args:
-        co2_indoor : float or int
-            single data point of CO2 concentration indoors in ppm.
+        co2_indoor (float | int): single data point of CO2 concentration indoors in ppm.
 
     Returns:
-        index : int
+        index (int):
             single IAQ index, range 1 (best) - 3 (worst), corresponds to
             categories Excellent Class (1) / Good Class (2) / Unacceptable (3).
     """
@@ -238,11 +239,10 @@ def _iaq_co2_uba(co2_indoor: Union[float, int]) -> int:
     Helper function to calculate IAQ index for a single measurement based on German EPA standard (Umweltbundesamt).
 
     Args:
-        co2_indoor : float or int
-            single data point of CO2 concentration indoors in ppm.
+        co2_indoor (float | int): single data point of CO2 concentration indoors in ppm.
 
     Returns:
-        index : int
+        index (int):
             single IAQ index, range 1 (best) - 3 (worst), corresponds to
             categories hygienically safe (1) / hygienically conspicuous (2) / Hygienically unacceptable (3).
     """
@@ -264,16 +264,12 @@ def _iaq_co2_single_th(
     a single threshold value.
 
     Args:
-        co2_indoor : float or int
-            single data point of CO2 concentration indoors in ppm.
-        threshold : float or int
-            threshold value for acceptable IAQ
-        includingth : bool
-            whether or not the threshold value is included for acceptable IAQ, depends on standard.
+        co2_indoor (float | int): single data point of CO2 concentration indoors in ppm.
+        threshold (float | int): threshold value for acceptable IAQ
+        includingth (bool): whether or not the threshold value is included for acceptable IAQ, depends on standard.
 
     Returns:
-        index : int
-            single IAQ index, range 1 (accpetable) - 2 (unacceptable).
+        index (int): single IAQ index, range 1 (accpetable) - 2 (unacceptable).
     """
     if includingth is True:
         # acceptable including threshold, 1: acceptable, 2: unacceptable
@@ -295,18 +291,13 @@ def _iaq_delta_co2_single_th(
     indoors/outdoors and a single threshold value.
 
     Args:
-        co2_indoor : float or int
-            single data point of CO2 concentration indoors in ppm.
-        co2_outdoor : float or int
-            single data point of CO2 concentration outdoors in ppm.
-        threshold : float or int
-            threshold value for acceptable IAQ
-        includingth : bool
-            whether or not the threshold value is included for acceptable IAQ, depends on standard.
+        co2_indoor (float | int): single data point of CO2 concentration indoors in ppm.
+        co2_outdoor (float | int): single data point of CO2 concentration outdoors in ppm.
+        threshold (float | int): threshold value for acceptable IAQ
+        includingth (bool): whether or not the threshold value is included for acceptable IAQ, depends on standard.
 
     Returns:
-        index : int
-            single IAQ index, range 1 (accpetable) - 2 (unacceptable).
+        index (int): single IAQ index, range 1 (accpetable) - 2 (unacceptable).
     """
     delta_co2 = co2_indoor - co2_outdoor
     if includingth is True:

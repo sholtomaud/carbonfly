@@ -1,18 +1,34 @@
-from __future__ import annotations
 """
 carbonfly
-    a lightweight, easy-to-use Python API and 
+    a lightweight, easy-to-use Python API and
     toolbox for indoor CO2 CFD simulations in Grasshopper
     based on OpenFOAM and WSL
 
 - Author: Qirui Huang
 - License: LGPL-3.0
 - Website: https://github.com/RWTH-E3D/carbonfly
+
+.. note::
+   This module depends on the RhinoCommon API and can only be used
+   inside Rhino / Grasshopper. The ``Rhino`` module is provided by Rhino.
 """
 
+from __future__ import annotations
+
 # carbonfly/mesh.py
-import Rhino
+try:
+    import Rhino
+except ImportError:
+    Rhino = None
+
 from typing import Iterable, Tuple, List
+
+
+def _require_rhino() -> None:
+    """Raise a clear error if RhinoCommon is not available."""
+    if Rhino is None:
+        raise RuntimeError("Rhino is required for geometry operations.")
+
 
 def brep_to_mesh(brep: Rhino.Geometry.Brep) -> Rhino.Geometry.Mesh:
     """
@@ -24,17 +40,22 @@ def brep_to_mesh(brep: Rhino.Geometry.Brep) -> Rhino.Geometry.Mesh:
     Returns:
         Rhino.Geometry.Mesh: A unified, triangulated mesh, or None if meshing failed.
     """
+    _require_rhino()
     mp = Rhino.Geometry.MeshingParameters.Default
     lst = Rhino.Geometry.Mesh.CreateFromBrep(brep, mp)
     if not lst:
         return None
     m = Rhino.Geometry.Mesh()
-    for x in lst: m.Append(x)
-    m.UnifyNormals(); m.Compact()
-    if m.Faces.QuadCount > 0: m.Faces.ConvertQuadsToTriangles()
+    for x in lst:
+        m.Append(x)
+    m.UnifyNormals()
+    m.Compact()
+    if m.Faces.QuadCount > 0:
+        m.Faces.ConvertQuadsToTriangles()
     m.Normals.ComputeNormals()
 
     return m
+
 
 def mesh_triangles(mesh):
     """
@@ -48,48 +69,76 @@ def mesh_triangles(mesh):
         tuple: ((ax,ay,az), (bx,by,bz), (cx,cy,cz), (nx,ny,nz))
                where (a,b,c) are vertex coordinates and (n) is the face normal.
     """
+    _require_rhino()
     V, F = mesh.Vertices, mesh.Faces
     for i in range(F.Count):
         f = F[i]
-        tris = [(f.A,f.B,f.C)] if f.IsTriangle else list(f.Triangulate())
-        for a,b,c in tris:
+        tris = [(f.A, f.B, f.C)] if f.IsTriangle else list(f.Triangulate())
+        for a, b, c in tris:
             pa, pb, pc = V[a], V[b], V[c]
-            v1 = Rhino.Geometry.Vector3f(pb.X-pa.X, pb.Y-pa.Y, pb.Z-pa.Z)
-            v2 = Rhino.Geometry.Vector3f(pc.X-pa.X, pc.Y-pa.Y, pc.Z-pa.Z)
-            n  = Rhino.Geometry.Vector3f.CrossProduct(v1, v2)
-            if n.Length > 1e-20: n.Unitize()
-            yield ((pa.X,pa.Y,pa.Z),(pb.X,pb.Y,pb.Z),(pc.X,pc.Y,pc.Z),(n.X,n.Y,n.Z))
+            v1 = Rhino.Geometry.Vector3f(pb.X - pa.X, pb.Y - pa.Y, pb.Z - pa.Z)
+            v2 = Rhino.Geometry.Vector3f(pc.X - pa.X, pc.Y - pa.Y, pc.Z - pa.Z)
+            n = Rhino.Geometry.Vector3f.CrossProduct(v1, v2)
+            if n.Length > 1e-20:
+                n.Unitize()
+            yield (
+                (pa.X, pa.Y, pa.Z),
+                (pb.X, pb.Y, pb.Z),
+                (pc.X, pc.Y, pc.Z),
+                (n.X, n.Y, n.Z),
+            )
+
 
 def _scale_factor(unit: str) -> float:
     """
-    Convert unit label to meters scale factor: 'mm'->1e-3, 'cm'->1e-2, 'm'->1.
-    """
-    u = (unit or "mm").lower()
-    if u == "mm": return 1e-3
-    if u == "cm": return 1e-2
-    if u == "m":  return 1.0
-    raise ValueError("unit must be 'mm'|'cm'|'m'")
-
-def write_multi_solid_ascii_stl(
-    out_path,
-    named_meshes: Iterable[Tuple[str, Rhino.Geometry.Mesh]],
-    unit: str
-):
-    """
-    Write a multi-solid ASCII STL at out_path.
+    Return scale factor converting input geometry units to meters.
 
     Args:
-        out_path:     pathlib.Path or str
-        named_meshes: iterable of (name, mesh)
-        unit:         'mm' | 'cm' | 'm' (will be scaled to meters)
+        unit: Unit label. Supported: "mm", "cm", "m".
+
+    Returns:
+        Scale factor to convert coordinates to meters.
+
+    Raises:
+        ValueError: If unit is not one of "mm", "cm", "m".
+    """
+    u = (unit or "mm").lower()
+    if u == "mm":
+        return 1e-3
+    if u == "cm":
+        return 1e-2
+    if u == "m":
+        return 1.0
+    raise ValueError("unit must be 'mm'|'cm'|'m'")
+
+
+def write_multi_solid_ascii_stl(
+    out_path, named_meshes: Iterable[Tuple[str, Rhino.Geometry.Mesh]], unit: str
+):
+    """
+    Write a multi-solid ASCII STL file.
+
+    Each entry in `named_meshes` becomes one `solid <name> ... endsolid <name>`
+    block. Geometry is scaled to meters using `unit`.
+
+    Args:
+        out_path: Output path (Path or str).
+        named_meshes: Iterable of (name, mesh) pairs.
+        unit: Unit label for input meshes ("mm" | "cm" | "m").
+
+    Returns:
+        Path to the written STL file.
     """
     from pathlib import Path
+
     sf = _scale_factor(unit)
     lines: List[str] = []
     for nm, mesh in named_meshes:
         name = str(nm).replace(" ", "_")
         lines.append(f"solid {name}")
-        for (ax,ay,az),(bx,by,bz),(cx,cy,cz),(nx,ny,nz) in mesh_triangles(mesh):
+        for (ax, ay, az), (bx, by, bz), (cx, cy, cz), (nx, ny, nz) in mesh_triangles(
+            mesh
+        ):
             lines.append(f"  facet normal {nx:.6e} {ny:.6e} {nz:.6e}")
             lines.append("    outer loop")
             lines.append(f"      vertex {ax*sf:.6e} {ay*sf:.6e} {az*sf:.6e}")

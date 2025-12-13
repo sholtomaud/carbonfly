@@ -1,7 +1,6 @@
-from __future__ import annotations
 """
 carbonfly
-    a lightweight, easy-to-use Python API and 
+    a lightweight, easy-to-use Python API and
     toolbox for indoor CO2 CFD simulations in Grasshopper
     based on OpenFOAM and WSL
 
@@ -10,141 +9,229 @@ carbonfly
 - Website: https://github.com/RWTH-E3D/carbonfly
 """
 
+from __future__ import annotations
+
 # carbonfly/boundary.py
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, Literal, Tuple
 
 Vec3 = Tuple[float, float, float]
 
+
 # Minimal representations of common field specifications
+# Each class maps directly to one OpenFOAM patchField dictionary
 @dataclass
 class FieldFV:
     """Fixed value boundary condition (fixedValue)."""
+
     value: Any  # scalar or vector (tuple)
+
     def to_dict(self):
         return {"type": "fixedValue", "value": self.value}
+
 
 @dataclass
 class FieldZG:
     """Zero gradient boundary condition (zeroGradient)."""
+
     def to_dict(self):
         return {"type": "zeroGradient"}
+
 
 @dataclass
 class FieldNoSlip:
     """No-slip boundary condition for velocity U (vector): U = 0."""
+
     def to_dict(self):
         return {"type": "noSlip"}
+
 
 @dataclass
 class FieldInletOutlet:
     """inletOutlet boundary condition."""
+
     inletValue: Any
     value: Any
+
     def to_dict(self):
-        return {"type": "inletOutlet", "inletValue": self.inletValue, "value": self.value}
+        return {
+            "type": "inletOutlet",
+            "inletValue": self.inletValue,
+            "value": self.value,
+        }
+
 
 @dataclass
 class FieldCalculated:
     """calculated"""
+
     value: Any
+
     def to_dict(self):
         return {"type": "calculated", "value": self.value}
+
 
 @dataclass
 class FieldAlphatJayatillekeWF:
     """compressible::alphatJayatillekeWallFunction"""
+
     value: Any
     Prt: float = 0.85
+
     def to_dict(self):
-        return {"type": "compressible::alphatJayatillekeWallFunction", "value": self.value, "Prt": self.Prt}
+        return {
+            "type": "compressible::alphatJayatillekeWallFunction",
+            "value": self.value,
+            "Prt": self.Prt,
+        }
+
 
 @dataclass
 class FieldEpsilonWallFunction:
+    """epsilonWallFunction"""
+
     value: Any
+
     def to_dict(self):
         return {"type": "epsilonWallFunction", "value": self.value}
 
+
 @dataclass
 class FieldKqRWallFunction:
+    """kqRWallFunction"""
+
     value: Any
+
     def to_dict(self):
         return {"type": "kqRWallFunction", "value": self.value}
 
+
 @dataclass
 class FieldNutkWallFunction:
+    """nutkWallFunction"""
+
     value: Any
+
     def to_dict(self):
         return {"type": "nutkWallFunction", "value": self.value}
+
 
 @dataclass
 class FieldMixingLengthEpsilonInlet:
     """turbulentMixingLengthDissipationRateInlet"""
+
     value: Any
     mixingLength: Any = 0.0168
+
     def to_dict(self):
-        return {"type": "turbulentMixingLengthDissipationRateInlet", "value": self.value, "mixingLength": self.mixingLength}
+        return {
+            "type": "turbulentMixingLengthDissipationRateInlet",
+            "value": self.value,
+            "mixingLength": self.mixingLength,
+        }
+
 
 @dataclass
 class FieldIntensityKInlet:
     """turbulentIntensityKineticEnergyInlet"""
+
     intensity: Any = 0.14
     value: Any = 0.0
+
     def to_dict(self):
-        return {"type": "turbulentIntensityKineticEnergyInlet", "intensity": self.intensity, "value": self.value}
+        return {
+            "type": "turbulentIntensityKineticEnergyInlet",
+            "intensity": self.intensity,
+            "value": self.value,
+        }
+
 
 @dataclass
 class FieldMarshakRadiation:
-    emissivityMode: str = "lookup"   # or 'solidThermo'
+    """MarshakRadiation"""
+
+    emissivityMode: str = "lookup"  # or 'solidThermo'
     emissivity: Any = 0.98
     value: Any = 0.0
+
     def to_dict(self):
-        return {"type": "MarshakRadiation", "emissivityMode": self.emissivityMode, "emissivity": self.emissivity, "value": self.value}
+        return {
+            "type": "MarshakRadiation",
+            "emissivityMode": self.emissivityMode,
+            "emissivity": self.emissivity,
+            "value": self.value,
+        }
+
 
 @dataclass
 class FieldTotalPressure:
+    """totalPressure"""
+
     p0: Any = "$internalField"
     value: Any = "$internalField"
+
     def to_dict(self):
         return {"type": "totalPressure", "p0": self.p0, "value": self.value}
 
+
 @dataclass
 class FieldFixedFluxPressure:
+    """fixedFluxPressure"""
+
     value: Optional[Any] = None
+
     def to_dict(self):
         d = {"type": "fixedFluxPressure"}
         if self.value is not None:
             d["value"] = self.value
         return d
 
+
 @dataclass
 class FieldPressureInletOutletVelocity:
+    """pressureInletOutletVelocity"""
+
     inletValue: Any
     value: Any
+
     def to_dict(self):
-        return {"type": "pressureInletOutletVelocity", "inletValue": self.inletValue, "value": self.value}
+        return {
+            "type": "pressureInletOutletVelocity",
+            "inletValue": self.inletValue,
+            "value": self.value,
+        }
+
 
 @dataclass
 class FieldExternalWallHeatFluxTemperature:
+    """externalWallHeatFluxTemperature"""
+
     mode: str = "coefficient"
     h: Any = 0.0
     Ta: Any = 300.0
     value: Any = 300.0
-    def to_dict(self):
-        return {"type": "externalWallHeatFluxTemperature", "mode": self.mode, "h": self.h, "Ta": self.Ta, "value": self.value}
 
-BoundaryType = Literal["inletVelocity", "outletPressure", "wall", "symmetry", "custom"]
+    def to_dict(self):
+        return {
+            "type": "externalWallHeatFluxTemperature",
+            "mode": self.mode,
+            "h": self.h,
+            "Ta": self.Ta,
+            "value": self.value,
+        }
+
 
 @dataclass
 class FieldDynamicRespiration:
     """
-    Dynamic respiration velocity boundary for U using codedFixedValue (sine wave).
+    Dynamic respiration velocity boundary using codedFixedValue.
 
-    Inputs:
-        freq: breaths per minute, default: 12 breaths per minute (0.2 Hz)
-        minute_vent_L_min: respiration/exhaled airflow (L/min), default: 7.2 L/min
-        name: name of codedFixedValue (optional)
+    Args:
+        freq (float): Breathing frequency in breaths per minute.
+        minute_vent_L_min (float): Minute ventilation in L/min.
+        name (str): Name of the codedFixedValue block.
     """
+
     freq: float = 12.0
     minute_vent_L_min: float = 7.2
     name: str = "breathingSine"
@@ -157,8 +244,7 @@ class FieldDynamicRespiration:
         freq_hz = self.freq / 60
 
         # OpenFOAM codedFixedValue
-        code = (
-f"""#{{
+        code = f"""#{{
     const fvPatch& p = patch();
     const vectorField n = p.nf();
     const scalar A = gSum(mag(p.Sf()));
@@ -180,13 +266,12 @@ f"""#{{
     fixedValueFvPatchVectorField::updateCoeffs();
 
 #}};"""
-        )
 
         return {
             "type": "codedFixedValue",
             "value": "uniform (0 0 0)",
             "name": self.name,
-            "code": code
+            "code": code,
         }
 
 
@@ -196,13 +281,11 @@ class FieldCO2FromPatchAverage:
     Set CO2 at this patch to the area-weighted average CO2 on another patch.
     Typical use: AC outlet recirculation -> sample from AC inlet.
 
-    Parameters
-    ----------
-    source_patch : str
-        Name of the patch to sample CO2 from (e.g., "ac_inlet").
-    name : str
-        Name of the codedFixedValue object (OpenFOAM requires a name).
+    Args:
+        source_patch (str): Patch to sample CO2 from.
+        name (str): Name of the codedFixedValue block.
     """
+
     source_patch: str
     name: str = "co2FromPatchAvg"
 
@@ -254,10 +337,17 @@ class FieldCO2FromPatchAverage:
         }
 
 
+BoundaryType = Literal["inletVelocity", "outletPressure", "wall", "symmetry", "custom"]
+
+
 @dataclass
 class Boundary:
-    region_name: str                   # e.g. "inlet_01" (from STL solid name)
-    patch_name: Optional[str] = None   # Final patch name in OpenFOAM (defaults to region_name if None)
+    """Patch-level boundary-condition container"""
+
+    region_name: str  # e.g. "inlet_01" (from STL solid name)
+    patch_name: Optional[str] = (
+        None  # Final patch name in OpenFOAM (defaults to region_name if None)
+    )
     btype: BoundaryType = "inletVelocity"
     # Field specifications as needed: U (velocity), T (temperature), CO2 (fraction)
     fields: Dict[str, Any] = field(default_factory=dict)

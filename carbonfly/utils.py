@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 carbonfly
     a lightweight, easy-to-use Python API and 
@@ -9,6 +8,8 @@ carbonfly
 - License: LGPL-3.0
 - Website: https://github.com/RWTH-E3D/carbonfly
 """
+
+from __future__ import annotations
 
 # carbonfly/utils.py
 """
@@ -32,14 +33,15 @@ def foam_header(
     Return an OpenFOAM-style header with Carbonfly attribution.
 
     Args:
-        object_name:    OpenFOAM object name (e.g., 'snappyHexMeshDict', 'U').
-        of_class:       OpenFOAM class (e.g., 'dictionary', 'volScalarField', 'volVectorField').
-        of_version:     OpenFOAM version label to show in the banner.
-        project_name:   Project name for attribution line.
-        author:         Author handle for attribution line.
-        project_url:    URL for the project.
+        object_name (str): OpenFOAM object name (e.g., ``snappyHexMeshDict``, ``U``).
+        of_class (str): OpenFOAM class (e.g., ``dictionary``, ``volScalarField``).
+        location (str | None): OpenFOAM location entry (e.g., ``"system"``). If None, omitted.
+        of_version (str): OpenFOAM version label shown in the banner.
+        project_name (str): Project name for attribution.
+        author (str): Attribution author name.
+        project_url (str): Project URL for attribution.
 
-    Usage:
+    Examples:
         lines = [foam_header("snappyHexMeshDict")]
     """
     banner = (
@@ -74,6 +76,15 @@ def foam_header(
 
 
 def unit_scale_to_m(unit: str) -> float:
+    """
+    Convert a unit label to a meters scale factor.
+
+    Args:
+        unit (str): Unit label. Supported: `mm`, `cm`, `m`.
+
+    Returns:
+        float: Scale factor to meters (mm->1e-3, cm->1e-2, m->1).
+    """
     u = (unit or "mm").strip().lower()
     if u == "mm": return 1e-3
     if u == "cm": return 1e-2
@@ -86,15 +97,15 @@ def co2_generation_rate(age: float, met: float, gender: str | None = None):
     Get CO2 generation rate (L/s) based on mean body mass in each age group.
     
     Args:
-        age: Age in float.
-        met: Level of physical activity (met), met must be one of [1.0, 1.2, 1.4, 1.6, 2.0, 3.0, 4.0].
-        gender: "male", "female", None (default returns average for both genders).
+        age (float): Age in years.
+        met (float): Metabolic rate (met). Must be one of ``[1.0, 1.2, 1.4, 1.6, 2.0, 3.0, 4.0]``.
+        gender (str | None): ``"male"``, ``"female"``, or None (average of both, default).
 
     Returns:
-        A dict contains
-            "mass" (mean body mass, kg), 
-            "BMR" (Basal Metabolic Rate, MJ/day), 
-            "CO2" (CO2 generation rate, L/s)
+        dict[str, float]: A dict with:
+            - ``mass``: Mean body mass (kg)
+            - ``BMR``: Basal metabolic rate (MJ/day)
+            - ``CO2``: CO2 generation rate (L/s)
     
     Source:
         Persily and De Jonge, Carbon dioxide generation rates for building
@@ -162,7 +173,7 @@ def co2_generation_rate(age: float, met: float, gender: str | None = None):
     else:
         gender = gender.lower()
         if gender not in CO2_generation_table:
-            raise ValueError("gender must be one of {male,female}")
+            raise ValueError("gender must be one of {'male', 'female'}")
         m, b, c = _find_one(gender)
         return {"mass": m, "BMR": b, "CO2": c}
 
@@ -203,18 +214,16 @@ def wind_pressure_en1991(
     d: float,
     window_size: float,
     zone: str,
-    terrain: Optional[int] = 4,
-    c_dir: Optional[float] = 1.0,
-    c_season: Optional[float] = 1.0,
-    c0: Optional[float] = 1.0,
-    rho: Optional[float] = 1.25,
-    k_i: Optional[float] = 1.0
+    terrain: int = 4,
+    c_dir: float = 1.0,
+    c_season: float = 1.0,
+    c0: float = 1.0,
+    rho: float = 1.25,
+    k_i: float = 1.0,
 ) -> dict:
     """
-    Computes peak and surface wind pressure for vertical walls of rectangular plan buildings (h/d <=5 and height <= 200m), based on DIN EN 1991-1-4:2010-12.
-
-    Notes:
-        For other building types, please see DIN EN 1991-1-4:2010-12.
+    Computes peak and surface wind pressure for vertical walls of rectangular plan buildings
+    (h/d <=5 and height <= 200m), based on DIN EN 1991-1-4:2010-12.
 
     Args:
         vb0: fundamental value of the basic wind velocity v_b,0 [m/s] (from National Annex map, 10 m, terrain II, 50 yr)
@@ -222,7 +231,34 @@ def wind_pressure_en1991(
         h: height of the building [m]
         d: length of the building [m]
         window_size: window size in [m^2]
-        zone: External pressure zones, A/B/C on side/roof edges along the flow, D windward face, and E leeward face. Schematic (Fig. 7.5) see below:
+        zone: External pressure zones, A/B/C on side/roof edges along the flow, D windward face, and E leeward face.
+            Schematic (Fig. 7.5) see Notes.
+        terrain: terrain type, 0/1/2/3/4, default: 4, corresponding to Type 0/I/II/III/IV:
+            0: Sea, coastal area exposed to the open sea.
+            1: Lakes or area with negligible vegetation and without obstacles.
+            2: Area with low vegetation such as grass and isolated obstacles (trees, buildings) with separations of
+                at least 20 obstacle heights.
+            3: Area with regular cover of vegetation or buildings or with isolated obstacles with separations of
+                maximum 20 obstacle heights (such as villages, suburban terrain, permanent forest).
+            4: Area in which at least 15 % of the surface is covered with buildings and their average height
+                exceeds 15 m.
+        c_dir: directional factor, for various wind directions may be found in the National Annex.
+            The recommended value is 1.0.
+        c_season: season factor, may be given in the National Annex. The recommended value is 1.0.
+        c0: orography factor, taken as 1.0 unless otherwise specified. Note: Information on c0 may be given in
+            the National Annex. If the orography is accounted for in the basic wind velocity,
+            the recommended value is 1.0.
+        rho: air density in kg/m3. The default value is 1.25 kg/m3.
+        k_i: turbulence factor. The value of k_i may be given in the National Annex.
+            The recommended value for k_i is 1.0.
+
+    Notes:
+        For other building types, please see DIN EN 1991-1-4:2010-12.
+
+        Zone definition schematic (EN 1991-1-4, e.g., Fig. 7.5):
+
+        .. code-block:: text
+
             Top view:
                            <- - - d (length)  - ->
                            -----------------------     ^
@@ -232,6 +268,9 @@ def wind_pressure_en1991(
                            -----------------------     -
                 D = windward face (positive pressure / stagnation)
                 E = leeward face (negative pressure / wake suction)
+
+        .. code-block:: text
+
             Side view:
                            <- - - d (length)  - ->
                            -----------------------     ^
@@ -244,26 +283,16 @@ def wind_pressure_en1991(
                 A: leading corner band (strongest suction)
                 B: intermediate edge band
                 C: outer side/roof band
-        terrain: terrain type, 0/1/2/3/4, default: 4, corresponding to Type 0/I/II/III/IV:
-            0: Sea, coastal area exposed to the open sea.
-            1: Lakes or area with negligible vegetation and without obstacles.
-            2: Area with low vegetation such as grass and isolated obstacles (trees, buildings) with separations of at least 20 obstacle heights.
-            3: Area with regular cover of vegetation or buildings or with isolated obstacles with separations of maximum 20 obstacle heights (such as villages, suburban terrain, permanent forest).
-            4: Area in which at least 15 % of the surface is covered with buildings and their average height exceeds 15 m.
-        c_dir: directional factor, for various wind directions may be found in the National Annex. The recommended value is 1.0.
-        c_season: season factor, may be given in the National Annex. The recommended value is 1.0.
-        c0: orography factor, taken as 1.0 unless otherwise specified. Note: Information on c0 may be given in the National Annex. If the orography is accounted for in the basic wind velocity, the recommended value is 1.0.
-        rho: air density in kg/m3. The default value is 1.25 kg/m3.
-        k_i: turbulence factor. The value of k_i may be given in the National Annex. The recommended value for k_i is 1.0.
 
     Returns:
-      {'we': wind pressure on the external surface [Pa],
-       'cpe': external pressure coefficients for vertical walls of rectangular plan buildings [-],
-       'qp': peak velocity pressure [Pa],
-       'vm': mean wind speed [m/s],
-       'Iv': turbulence intensity,
-       'cr': roughness factor,
-       'vb': basic wind velocity [m/s]}
+        dict[str, float]: Results dictionary with keys:
+            - ``we``: external surface wind pressure (Pa)
+            - ``cpe``: external pressure coefficient (-)
+            - ``qp``: peak velocity pressure (Pa)
+            - ``vm``: mean wind speed (m/s)
+            - ``Iv``: turbulence intensity (-)
+            - ``cr``: roughness factor (-)
+            - ``vb``: basic wind velocity (m/s)
     """
     if z > 200:
         raise ValueError("z must be smaller than 200 m")
@@ -345,17 +374,18 @@ def air_exchange_rate_maas1995(A_eff: float, u: float, H: float, delta_theta: fl
     Qdot = 3600 * 1/2 * A_eff * sqrt(C1 * u^2 + C2 * H * delta_theta + C3)
 
     Source:
-    Anton Maas. Experimental quantification of air exchange during window ventilation. PhD thesis, University of Kassel, Kassel, 1995.
-    URL https://www.uni-kassel.de/fb6/bpy/de/forschung/abgeschlprojekte/pdfs/maas_diss.pdf
+        Anton Maas. Experimental quantification of air exchange during window ventilation.
+        PhD thesis, University of Kassel, Kassel, 1995.
+        URL https://www.uni-kassel.de/fb6/bpy/de/forschung/abgeschlprojekte/pdfs/maas_diss.pdf
 
     Args:
-        A_eff: effective opening area in m^2
-        u: outdoor wind speed (10 m) in m/s
-        H: height of the window sash in m
-        delta_theta: temperature difference between the inside and outside in K
+        A_eff (float): effective opening area in m^2
+        u (float): outdoor wind speed (10 m) in m/s
+        H: (float) height of the window sash in m
+        delta_theta (float): temperature difference between the inside and outside in K
 
     Returns:
-        Qdot: air exchange rate through the opening in m3/h
+        Qdot (float): air exchange rate through the opening in m3/h
     """
     C1 = 0.0056
     C2 = 0.0037

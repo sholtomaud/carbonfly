@@ -1,7 +1,6 @@
-from __future__ import annotations
 """
 carbonfly
-    a lightweight, easy-to-use Python API and 
+    a lightweight, easy-to-use Python API and
     toolbox for indoor CO2 CFD simulations in Grasshopper
     based on OpenFOAM and WSL
 
@@ -10,12 +9,15 @@ carbonfly
 - Website: https://github.com/RWTH-E3D/carbonfly
 """
 
+from __future__ import annotations
+
 # carbonfly/postproc.py
 from pathlib import Path
 from typing import Iterable, List, Dict, Any, Optional, Tuple, Union
 
 from .utils import foam_header
 from .wsl import win_to_wsl_path, run_wsl_console
+
 
 def write_internal_probes_dict(
     case_root: str | Path,
@@ -29,14 +31,14 @@ def write_internal_probes_dict(
     Create/overwrite system/internalProbes for post-processing.
 
     Args:
-        case_root: case folder on Windows, e.g. r"C:\Data\Carbonfly\case_name"
-        points: iterable of (x, y, z)
-        fields: iterable of field names, e.g. ("CO2", "T", "U")
-        ordered: set to True so output order == input order (for Grasshopper)
-        filename: normally 'internalProbes', but you can change it
+        case_root (str | Path): Case folder on Windows, e.g. r"C:\\Data\\Carbonfly\\case_name".
+        points (Iterable[Iterable[float]]): Probe points as (x, y, z) tuples/lists.
+        fields (Iterable[str]): Field names to sample, e.g. ("CO2", "T", "U").
+        ordered (bool): If True, set `ordered yes;` so output order matches input order.
+        filename (str): Output filename under system/. Default is "internalProbes".
 
     Returns:
-        Path to the created dict (Windows path).
+        Path: Path to the created dict (Windows path).
     """
     case_root = Path(case_root)
     system_dir = case_root / "system"
@@ -62,14 +64,19 @@ def write_internal_probes_dict(
 
     include_line = '#includeEtc "caseDicts/postProcessing/probes/internalProbes.cfg"'
 
-    content_lines = [header] + pts_lines + [""] + fld_lines + ["", ordered_line, "", include_line, ""]
+    content_lines = (
+        [header]
+        + pts_lines
+        + [""]
+        + fld_lines
+        + ["", ordered_line, "", include_line, ""]
+    )
     content = "\n".join(content_lines)
 
     out_path = system_dir / filename
     out_path.write_text(content, encoding="utf-8")
 
     return out_path
-
 
 
 def run_internal_probes_postprocess(
@@ -84,18 +91,18 @@ def run_internal_probes_postprocess(
     Call `postProcess -func internalProbes` in WSL for an existing case.
 
     Args:
-        case_root: Windows path to the case directory
-        foam_bashrc: OpenFOAM bashrc
-        distro: WSL distro name if needed
-        time_selector:
-            None          -> no time option (process all)
-            "latestTime" or "latest" or "last"  -> -latestTime
-            "100"         -> -time 100
-            "0:100"       -> -time 0:100
-        log_rel: WSL-side log path (relative to case)
+        case_root (str | Path): Windows path to the case directory.
+        foam_bashrc (str): OpenFOAM bashrc path inside WSL.
+        distro (str | None): WSL distro name if needed.
+        time_selector (str | None):
+            - None: no time option (process all)
+            - "latestTime" / "latest" / "last": add `-latestTime`
+            - "100": add `-time 100`
+            - "0:100": add `-time 0:100`
+        log_rel (str): Log path (relative to case root).
 
     Returns:
-        process return code
+        int: Process return code.
     """
     case_root = Path(case_root)
     cwd_wsl = win_to_wsl_path(str(case_root))
@@ -115,7 +122,6 @@ def run_internal_probes_postprocess(
         distro=distro,
         log_rel=log_rel,
     )
-
 
 
 def _read_points_xy(fp: Path) -> Dict[str, Any]:
@@ -141,7 +147,7 @@ def _read_points_xy(fp: Path) -> Dict[str, Any]:
                 Vector fields reconstructed from *_x, *_y, *_z triplets, such as U.
             - raw_rows (List[Dict[str, float]]): Each data row as a mapping from column name to value.
 
-        Example:
+    Examples:
         {
           "columns": ["distance", "x", "y", "z", "CO2", "T", "U_x", "U_y", "U_z", "p"],
           "points":  [(x,y,z), ...],
@@ -207,7 +213,7 @@ def _read_points_xy(fp: Path) -> Dict[str, Any]:
     vector_bases = []
     for col in columns:
         if col.endswith("_x"):
-            base = col[:-2]   # remove "_x"
+            base = col[:-2]  # remove "_x"
             # Check if it also has "_y" and "_z", if so -> vector
             if f"{base}_y" in columns and f"{base}_z" in columns:
                 vector_bases.append(base)
@@ -274,9 +280,7 @@ def collect_internal_probes_results(
     case_root = Path(case_root)
     base = case_root / "postProcessing" / "internalProbes"
     if not base.exists():
-        raise FileNotFoundError(
-            f"{base} not found. Please check your input."
-        )
+        raise FileNotFoundError(f"{base} not found. Please check your input.")
 
     # collect all time dirs
     dirs: List[Path] = [d for d in base.iterdir() if d.is_dir()]

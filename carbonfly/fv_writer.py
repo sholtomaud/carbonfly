@@ -1,7 +1,6 @@
-from __future__ import annotations
 """
 carbonfly
-    a lightweight, easy-to-use Python API and 
+    a lightweight, easy-to-use Python API and
     toolbox for indoor CO2 CFD simulations in Grasshopper
     based on OpenFOAM and WSL
 
@@ -10,17 +9,28 @@ carbonfly
 - Website: https://github.com/RWTH-E3D/carbonfly
 """
 
-# carbonfly/fv_templates.py
+from __future__ import annotations
+
+# carbonfly/fv_writer.py
 from pathlib import Path
 import re
 import shutil
-from typing import Literal, Optional
+from typing import Literal, Optional, Tuple
 
 
 Mode = Literal["transient", "steadystate"]
 
+
 def _normalize_mode(mode_in: str | None) -> Mode:
-    """map str to mode"""
+    """
+    Normalize user mode string to a supported template mode.
+
+    Args:
+        mode_in (str | None): Input mode string.
+
+    Returns:
+        Mode: "transient" or "steadystate".
+    """
     if not mode_in:
         return "transient"
     s = str(mode_in).strip().lower()
@@ -33,15 +43,25 @@ def _normalize_mode(mode_in: str | None) -> Mode:
 
 
 def _fmt_sci(x: float) -> str:
-    """scientific notation formats like 1e-5 (OpenFOAM style)"""
+    """Format a float in OpenFOAM-like scientific notation (e.g., 1e-5)."""
     s = f"{x:.0e}"
     # 1e+05 -> 1e5 / 1e-05 -> 1e-5
     s = s.replace("e+0", "e").replace("e+", "e").replace("e-0", "e-")
     return s
 
 
-def get_template_path(kind: Literal["fvSchemes","fvSolution"], mode: str | None) -> Path:
-    """Return the absolute path to carbonfly/templates/{mode}/{kind}"""
+def get_template_path(
+    kind: Literal["fvSchemes", "fvSolution"], mode: str | None
+) -> Path:
+    """Return the absolute path to a built-in fv template file.
+
+    Args:
+        kind (Literal["fvSchemes","fvSolution"]): Template filename.
+        mode (str | None): Mode selector (e.g., "transient", "steady", ...).
+
+    Returns:
+        Path: Absolute template path under `templates/<mode>/<kind>`.
+    """
     norm = _normalize_mode(mode)
     here = Path(__file__).resolve().parent
     root = here / "templates" / norm
@@ -56,8 +76,19 @@ def copy_fv_templates_to_case(
     overwrite: bool = True,
 ) -> dict[str, Path]:
     """
-    Copy the template to case_root/system/.
-    Returns {"fvSchemes": Path, "fvSolution": Path}
+    Copy fvSchemes and fvSolution templates into `case_root/system/`.
+
+    Args:
+        case_root (Path): Case root directory.
+        fvSchemes_src (Path): Source file for fvSchemes.
+        fvSolution_src (Path): Source file for fvSolution.
+        overwrite (bool): If False, keep existing destination files.
+
+    Returns:
+        dict[str, Path]: Paths of copied files: {"fvSchemes": ..., "fvSolution": ...}.
+
+    Raises:
+        FileNotFoundError: If any template source file does not exist.
     """
     case_root = Path(case_root)
     sysdir = case_root / "system"
@@ -87,11 +118,25 @@ def copy_fv_templates_to_case(
     return {"fvSchemes": dst_schemes, "fvSolution": dst_solution}
 
 
-def patch_fvSolution_pimple(fvsolution_path: Path,
-                            pRefPoint: Optional[Tuple[float, float, float]],
-                            residual_value: Optional[float]) -> Path:
+def patch_fvSolution_pimple(
+    fvsolution_path: Path,
+    pRefPoint: Optional[Tuple[float, float, float]],
+    residual_value: Optional[float],
+) -> Path:
     """
-    In the given fvSolution file, modify pRefPoint & residualControl in the PIMPLE{} section
+    Patch `PIMPLE{}` entries in an fvSolution file.
+
+    Modifies (if present) within the `PIMPLE { ... }` block:
+        - `pRefPoint` (if pRefPoint is provided)
+        - `residualControl { ... }` (if residual_value is provided)
+
+    Args:
+        fvsolution_path (Path): Path to an fvSolution file to patch in-place.
+        pRefPoint (tuple[float, float, float] | None): Target pRefPoint (x, y, z).
+        residual_value (float | None): Target residualControl value.
+
+    Returns:
+        Path: The same fvsolution_path (patched in-place).
     """
     text = fvsolution_path.read_text(encoding="utf-8", errors="ignore")
 
@@ -103,7 +148,7 @@ def patch_fvSolution_pimple(fvsolution_path: Path,
     start = m.start()
     i = m.end()
     depth = 0
-    brace_pos = text.find("{", i-1)
+    brace_pos = text.find("{", i - 1)
     if brace_pos == -1:
         return fvsolution_path
     i = brace_pos + 1
@@ -116,7 +161,7 @@ def patch_fvSolution_pimple(fvsolution_path: Path,
         i += 1
     end = i
 
-    pimple_block = text[ start:end ]
+    pimple_block = text[start:end]
     new_block = pimple_block
 
     # pRefPoint
@@ -126,7 +171,7 @@ def patch_fvSolution_pimple(fvsolution_path: Path,
             r"(pRefPoint\s*)\([\s\dEe+\-\.]*\)\s*;",
             rf"\1({x:.6g} {y:.6g} {z:.6g});",
             new_block,
-            flags=re.IGNORECASE
+            flags=re.IGNORECASE,
         )
 
     # residualControl

@@ -1,7 +1,6 @@
-from __future__ import annotations
 """
 carbonfly
-    a lightweight, easy-to-use Python API and 
+    a lightweight, easy-to-use Python API and
     toolbox for indoor CO2 CFD simulations in Grasshopper
     based on OpenFOAM and WSL
 
@@ -10,12 +9,22 @@ carbonfly
 - Website: https://github.com/RWTH-E3D/carbonfly
 """
 
+from __future__ import annotations
+
 # carbonfly/constant_writer.py
 from pathlib import Path
 
+
 def write_constant_files(case_root: Path):
     """
-    Copy the standard constant/ dicts
+    Copy standard `constant/` dictionaries into the case folder.
+
+    This writes a minimal set of OpenFOAM dicts under `case_root/constant/`,
+    using template files shipped with carbonfly. Existing files are not
+    overwritten.
+
+    Args:
+        case_root (Path): Case root directory.
     """
     const_dir = case_root / "constant"
     const_dir.mkdir(parents=True, exist_ok=True)
@@ -36,9 +45,19 @@ def write_constant_files(case_root: Path):
         if not dst.exists():
             dst.write_text(src.read_text())
 
+
 def write_residuals_file(case_root: Path):
     """
-    Copy the standard system/residuals
+    Copy the standard `system/residuals` file into the case folder.
+
+    Uses the template shipped with carbonfly. If the destination exists,
+    it is not overwritten.
+
+    Args:
+        case_root (Path): Case root directory.
+
+    Raises:
+        FileNotFoundError: If the residuals template file cannot be found.
     """
     sys_dir = case_root / "system"
     sys_dir.mkdir(parents=True, exist_ok=True)

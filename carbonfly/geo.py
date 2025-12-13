@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 carbonfly
     a lightweight, easy-to-use Python API and 
@@ -8,15 +7,30 @@ carbonfly
 - Author: Qirui Huang
 - License: LGPL-3.0
 - Website: https://github.com/RWTH-E3D/carbonfly
+
+.. note::
+   This module depends on the RhinoCommon API and can only be used
+   inside Rhino / Grasshopper. The ``Rhino`` module is provided by Rhino.
 """
+
+from __future__ import annotations
 
 # carbonfly/geo.py
 from dataclasses import dataclass
 from typing import Any, Optional
-import Rhino
+
+try:
+    import Rhino
+except ImportError:
+    Rhino = None
 
 from .boundary import Boundary
 
+
+def _require_rhino() -> None:
+    """Raise a clear error if RhinoCommon is not available."""
+    if Rhino is None:
+        raise RuntimeError("Rhino is required for geometry operations.")
 
 # Data models
 @dataclass
@@ -29,11 +43,13 @@ class Refine:
 @dataclass
 class CFGeo:
     """
-    A single CFD surface entity:
-      - name: region/solid name to be written into STL (and used in snappy regions{})
-      - brep: normalized Brep geometry (created from Surface/BrepFace/Brep)
-      - boundary: physical boundary description (Boundary), region_name will be bound to name
-      - refine: surface refinement levels (min,max)
+    A single CFD surface entity.
+
+    Attributes:
+        name (str): Region/solid name written into STL and used in snappy regions{}.
+        brep (Rhino.Geometry.Brep): Normalized Brep geometry.
+        boundary (Boundary): Boundary description bound to this region.
+        refine (Refine): Surface refinement levels (min_level, max_level).
     """
     name: str
     brep: Rhino.Geometry.Brep
@@ -43,7 +59,17 @@ class CFGeo:
 
 # Helpers
 def _to_brep(obj) -> Optional[Rhino.Geometry.Brep]:
-    """Normalize input geometry to a Rhino Brep."""
+    """Normalize input geometry to a Rhino Brep.
+
+    Supports Brep, BrepFace, and Surface. Returns None if unsupported.
+
+    Args:
+        obj: Rhino geometry input.
+
+    Returns:
+        Rhino.Geometry.Brep | None: Normalized Brep.
+    """
+    _require_rhino()
     if obj is None:
         return None
     if isinstance(obj, Rhino.Geometry.Brep):
@@ -59,15 +85,22 @@ def _to_brep(obj) -> Optional[Rhino.Geometry.Brep]:
 
 def _norm_refine(refine: Any) -> Refine:
     """
-    Normalize refine input to Refine(min,max).
+    Normalize refine input to Refine(min_level, max_level).
+
     Supported forms:
-      - int     -> (i, i)
-      - (min, max) / [min, max]
-      - dict {"min":3,"max":5}  -> (3,5)
-      - dict {"levels":(3,5)}   -> (3,5)
-      - Rhino.Geometry.Interval -> (int(T0), int(T1))
-      - None    -> (0,0)
+        - int -> (i, i)
+        - (min, max) / [min, max]
+        - dict {"min": 3, "max": 5} or {"levels": (3, 5)}
+        - Rhino.Geometry.Interval -> (int(T0), int(T1))
+        - None / unsupported -> (0, 0)
+
+    Args:
+        refine (Any): Refinement specification.
+
+    Returns:
+        Refine: Normalized refinement levels.
     """
+    _require_rhino()
     # int -> (i,i)
     if isinstance(refine, int):
         i = int(refine)
@@ -94,6 +127,7 @@ def _norm_refine(refine: Any) -> Refine:
                 mn, mx = mx, mn
             return Refine(mn, mx)
 
+
     # Rhino Interval
     if isinstance(refine, Rhino.Geometry.Interval):
         mn, mx = int(refine.T0), int(refine.T1)
@@ -105,6 +139,21 @@ def _norm_refine(refine: Any) -> Refine:
     return Refine(0, 0)
 
 def make_cfgeo(name: str, geometry, boundary: Boundary, refine_levels: Any = None) -> CFGeo:
+    """
+    Create a CFGeo from Rhino geometry and bind the region name to the Boundary.
+
+    Args:
+        name (str): Region/solid name.
+        geometry: Rhino Surface/BrepFace/Brep.
+        boundary (Boundary): Boundary specification.
+        refine_levels (Any, optional): Refinement levels (see `_norm_refine`).
+
+    Returns:
+        CFGeo: Constructed CFGeo object.
+
+    Raises:
+        ValueError: If name/boundary/geometry is invalid.
+    """
     if not isinstance(name, str) or not name.strip():
         raise ValueError("name must be a non-empty string")
     if boundary is None:

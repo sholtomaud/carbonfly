@@ -1,7 +1,6 @@
-from __future__ import annotations
 """
 carbonfly
-    a lightweight, easy-to-use Python API and 
+    a lightweight, easy-to-use Python API and
     toolbox for indoor CO2 CFD simulations in Grasshopper
     based on OpenFOAM and WSL
 
@@ -10,6 +9,8 @@ carbonfly
 - Website: https://github.com/RWTH-E3D/carbonfly
 """
 
+from __future__ import annotations
+
 # carbonfly/blockmesh_writer.py
 from math import ceil
 from pathlib import Path
@@ -17,8 +18,22 @@ from typing import Optional, Tuple
 
 from .utils import foam_header
 
-def _cells_from_size(Lx: float, Ly: float, Lz: float, cell_size: float) -> Tuple[int,int,int]:
-    """Compute (nx,ny,nz) from target cell size (meters)."""
+
+def _cells_from_size(
+    Lx: float, Ly: float, Lz: float, cell_size: float
+) -> Tuple[int, int, int]:
+    """
+    Compute (nx, ny, nz) from target cell size (meters).
+
+    Args:
+        Lx (float): Domain length in x (m).
+        Ly (float): Domain length in y (m).
+        Lz (float): Domain length in z (m).
+        cell_size (float): Target cell size (m), must be > 0.
+
+    Returns:
+        Tuple[int, int, int]: Number of cells (nx, ny, nz).
+    """
     if cell_size <= 0:
         raise ValueError("cell_size must be > 0.")
     nx = max(1, int(ceil(Lx / cell_size)))
@@ -26,28 +41,37 @@ def _cells_from_size(Lx: float, Ly: float, Lz: float, cell_size: float) -> Tuple
     nz = max(1, int(ceil(Lz / cell_size)))
     return nx, ny, nz
 
+
 def write_blockmesh_dict(
     case_root: Path,
     *,
-    min_xyz: Tuple[float,float,float],
-    max_xyz: Tuple[float,float,float],
-    cells: Optional[Tuple[int,int,int]] = None,
+    min_xyz: Tuple[float, float, float],
+    max_xyz: Tuple[float, float, float],
+    cells: Optional[Tuple[int, int, int]] = None,
     cell_size: Optional[float] = None,
-    grading: Tuple[float,float,float] = (1.0, 1.0, 1.0),
+    grading: Tuple[float, float, float] = (1.0, 1.0, 1.0),
     convert_to_meters: float = 1.0,
 ) -> Path:
     """
     Write a minimal system/blockMeshDict with a single hex block.
 
+    This helper writes a bounding-box blockMeshDict (no edges) with one patch
+    named `boundingbox` (type wall) containing all six faces.
+
     Args:
-        min_xyz/max_xyz: domain bounds in meters (since STL is already scaled to meters).
-        cells:           (nx,ny,nz). If None and cell_size provided, cells will be computed.
-        cell_size:       target cell size (m). Used only when cells is None.
-        grading:         simpleGrading (gx,gy,gz).
-        convert_to_meters: OpenFOAM convertToMeters (default 1.0).
+        case_root (Path): Case root directory (the parent of `system/`).
+        min_xyz (Tuple[float, float, float]): Domain min bounds (xmin, ymin, zmin) in meters.
+        max_xyz (Tuple[float, float, float]): Domain max bounds (xmax, ymax, zmax) in meters.
+        cells (Optional[Tuple[int, int, int]]): Explicit (nx, ny, nz). If None, computed from `cell_size`.
+        cell_size (Optional[float]): Target cell size (m). Used only when `cells` is None.
+        grading (Tuple[float, float, float]): simpleGrading factors (gx, gy, gz).
+        convert_to_meters (float): OpenFOAM `convertToMeters` (default 1.0).
 
     Returns:
-        Path to system/blockMeshDict.
+        Path: Path to the written `system/blockMeshDict`.
+
+    Raises:
+        ValueError: If bounds are invalid or cell_size <= 0.
     """
     (xmin, ymin, zmin) = min_xyz
     (xmax, ymax, zmax) = max_xyz
@@ -87,14 +111,16 @@ def write_blockmesh_dict(
     # vertices
     lines.append("vertices")
     lines.append("(")
-    for (x,y,z) in V:
+    for x, y, z in V:
         lines.append(f"    ({x:.6g} {y:.6g} {z:.6g})")
     lines.append(");\n")
 
     # single block
     lines.append("blocks")
     lines.append("(")
-    lines.append(f"    hex (0 1 2 3 4 5 6 7) ({nx} {ny} {nz}) simpleGrading ({gx} {gy} {gz})")
+    lines.append(
+        f"    hex (0 1 2 3 4 5 6 7) ({nx} {ny} {nz}) simpleGrading ({gx} {gy} {gz})"
+    )
     lines.append(");\n")
 
     # edges (none)
