@@ -1,12 +1,9 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+Writers and helpers for OpenFOAM `system/controlDict`.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module provides utilities to generate and customize `controlDict`
+files for OpenFOAM cases, supporting both steady-state and transient
+simulations.
 """
 
 from __future__ import annotations

@@ -1,12 +1,10 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+WSL runners for executing OpenFOAM commands from Windows.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module provides helpers to launch OpenFOAM utilities inside WSL from a
+Windows Python environment (typically Rhino/Grasshopper on Windows). It opens a
+real Windows console window, invokes `wsl.exe` to run a command in `bash`,
+and optionally mirrors live output to a log file inside the case folder.
 
 .. note::
    This module is intended for Windows environments with WSL installed.

@@ -1,12 +1,15 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+Writers and patchers for OpenFOAM `system/fvSchemes` and `system/fvSolution`.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module helps manage finite-volume (FV) configuration files by:
+- Selecting and copying built-in `fvSchemes` / `fvSolution` templates into an
+  OpenFOAM case (`<case>/system/`).
+- Optionally patching solver settings in `fvSolution`, currently focused on the
+  `PIMPLE { ... }` block (e.g., `pRefPoint` and `residualControl`).
+
+The functions are intended for programmatic case generation workflows, where
+users may start from carbonfly templates and then apply small, targeted edits
+without maintaining full custom dictionaries.
 """
 
 from __future__ import annotations

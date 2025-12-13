@@ -1,12 +1,8 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+Mesh utilities for Rhino-based OpenFOAM workflows.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module provides helper functions to convert Rhino geometries into
+triangle meshes and export them in formats suitable for OpenFOAM.
 
 .. note::
    This module depends on the RhinoCommon API and can only be used

@@ -1,12 +1,12 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+Data models for OpenFOAM boundary condition definitions.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module defines lightweight Python data structures used to
+describe physical boundary conditions (e.g. inlet, outlet, wall)
+in a solver-agnostic way.
+
+The boundary objects are later consumed by writer modules to
+generate OpenFOAM-compatible field dictionaries.
 """
 
 from __future__ import annotations

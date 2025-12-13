@@ -1,12 +1,12 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+High-level OpenFOAM case builder.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module orchestrates the full case generation workflow by combining
+geometry processing (Rhino Breps -> meshes -> STL export) with OpenFOAM
+dictionary and field writers.
+
+It is intended as a convenience layer for Grasshopper components where
+a single function call generates a runnable OpenFOAM case folder.
 """
 
 from __future__ import annotations

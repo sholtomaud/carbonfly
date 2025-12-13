@@ -1,20 +1,12 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and 
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+General utilities shared across the carbonfly library.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module contains small helper functions used by multiple writers and case-building utilities
 """
 
 from __future__ import annotations
 
 # carbonfly/utils.py
-"""
-Utility functions for generating OpenFOAM-compatible file structures.
-"""
 import math
 from typing import Optional
 

@@ -1,12 +1,12 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+Writers for OpenFOAM snappyHexMesh configuration files.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module provides helper functions to generate OpenFOAM dictionaries
+required for surface-based mesh refinement using `snappyHexMesh`, including:
+
+- `system/surfaceFeaturesDict` for extracting feature edges from STL geometry,
+- `system/snappyHexMeshDict` for castellated meshing, snapping, and layer addition,
+with support for multi-region STL files.
 """
 
 from __future__ import annotations

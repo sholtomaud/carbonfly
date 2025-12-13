@@ -1,12 +1,9 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and 
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+Geometry data models and RhinoCommon helpers for carbonfly.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module defines the core geometry container used by carbonfly's case builder:
+- `CFGeo`: a single CFD region/surface entity (name + Brep + Boundary + refinement)
+- `Refine`: snappyHexMesh surface refinement levels (min_level, max_level)
 
 .. note::
    This module depends on the RhinoCommon API and can only be used

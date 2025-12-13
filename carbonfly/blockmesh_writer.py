@@ -1,12 +1,12 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+Writers for OpenFOAM blockMesh configuration files.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module provides helper functions to generate `blockMeshDict`
+files for OpenFOAM cases, based on structured geometry definitions
+and user-defined mesh parameters.
+
+The generated dictionaries are intended to be used as the base mesh
+before further refinement steps (e.g. snappyHexMesh).
 """
 
 from __future__ import annotations

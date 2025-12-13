@@ -1,12 +1,10 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+Post-processing helpers for OpenFOAM cases.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module provides utilities to configure, run, and collect results from
+OpenFOAM post-processing workflows using internal probes.
+`internalProbes` commonly used for sampling scalar and vector fields
+along points or lines.
 """
 
 from __future__ import annotations

@@ -1,12 +1,9 @@
 """
-carbonfly
-    a lightweight, easy-to-use Python API and
-    toolbox for indoor CO2 CFD simulations in Grasshopper
-    based on OpenFOAM and WSL
+Indoor Air Quality (IAQ) utilities.
 
-- Author: Qirui Huang
-- License: LGPL-3.0
-- Website: https://github.com/RWTH-E3D/carbonfly
+This module provides standards-based, CO2-based IAQ evaluation helpers that
+can be used in Carbonfly workflows (e.g., post-processing simulation results or
+interpreting sensor measurements).
 """
 
 from __future__ import annotations
