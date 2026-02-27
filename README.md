@@ -168,10 +168,11 @@ If you want to cite **Carbonfly**, there are two ways to do it:
 
   ```bibtex
   @article{Huang_2026_Carbonfly_SoftwareX,
-    author    = {Huang, Qirui and Langenbeck, Anna and Frisch, J{\'e}r{\^o}me and van Treeck, Christoph},
+    author  = {Huang, Qirui and Langenbeck, Anna and Frisch, J{\'e}r{\^o}me and van Treeck, Christoph},
     title   = {{Carbonfly}: {An} easy-to-use {Python} library and {Grasshopper} toolbox for {CO}$_2$-based indoor airflow and air quality {CFD} simulation},
     journal = {SoftwareX},
     year    = {2026},
+    volume  = {34},
     pages   = {102580},
     doi     = {10.1016/j.softx.2026.102580},
   }
@@ -179,7 +180,7 @@ If you want to cite **Carbonfly**, there are two ways to do it:
 
   APA style:
   ```
-  Huang, Q., Langenbeck, A., Frisch, J., & van Treeck, C. (2026). Carbonfly: An easy-to-use Python library and Grasshopper toolbox for CO₂-based indoor airflow and air quality CFD simulation. SoftwareX, 102580. https://doi.org/10.1016/j.softx.2026.102580
+  Huang, Q., Langenbeck, A., Frisch, J., & van Treeck, C. (2026). Carbonfly: An easy-to-use Python library and Grasshopper toolbox for CO₂-based indoor airflow and air quality CFD simulation. SoftwareX, 34, 102580. https://doi.org/10.1016/j.softx.2026.102580
   ```
 
 - If your work depends on a specific release of Carbonfly, please additionally cite the archived Zenodo version corresponding to the release you used. Each release is archived on [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17117827.svg)](https://doi.org/10.5281/zenodo.17117827). Please either cite the version you used as indexed at Zenodo (for reproducibility) or cite all versions.
