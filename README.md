@@ -152,40 +152,76 @@ There are several ways you can contribute:
 - 🔧 Submit pull requests to improve the code or documentation
 - 📢 Share the plugin with others who may find it useful
 
-Copyright (C) 2025 Qirui Huang, [Institute of Energy Efficiency and Sustainable Building (E3D), RWTH Aachen University](https://www.e3d.rwth-aachen.de/go/id/iyld/?lidx=1)
+Copyright (C) 2026 Qirui Huang, [Institute of Energy Efficiency and Sustainable Building (E3D), RWTH Aachen University](https://www.e3d.rwth-aachen.de/go/id/iyld/?lidx=1)
 
 [Back to top ↥](#quick-navigation)
 
 ## How to cite
 
-If you want to cite **Carbonfly** in your academic work, there are two ways to do it:
+If you want to cite **Carbonfly**, there are two ways to do it:
 
-- Each release is archived on [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17117827.svg)](https://doi.org/10.5281/zenodo.17117827). Please either cite the version you used as indexed at Zenodo (for reproducibility) or cite all versions.
+- If you use Carbonfly in your academic work, please cite our journal paper: https://doi.org/10.1016/j.softx.2026.102580 (preferred)
 
   **Examples:**
 
   BibTeX:
 
   ```bibtex
-  @software{Carbonfly_Huang,
-    author    = {Qirui Huang},
-    title     = {Carbonfly: An easy-to-use {Python} library and {Grasshopper} toolbox for indoor {CO2} {CFD} simulation},
-    date      = {2025},
-    publisher = {Zenodo},
-    url       = {https://github.com/RWTH-E3D/carbonfly},
-    note      = {{GitHub} repository},
-    doi       = {10.5281/zenodo.17117827}
+  @article{Huang_2026_Carbonfly_SoftwareX,
+    author    = {Huang, Qirui and Langenbeck, Anna and Frisch, J{\'e}r{\^o}me and van Treeck, Christoph},
+    title   = {{Carbonfly}: {An} easy-to-use {Python} library and {Grasshopper} toolbox for {CO}$_2$-based indoor airflow and air quality {CFD} simulation},
+    journal = {SoftwareX},
+    year    = {2026},
+    pages   = {102580},
+    doi     = {10.1016/j.softx.2026.102580},
   }
   ```
 
   APA style:
   ```
-  Huang, Q. (2025). Carbonfly: An easy-to-use Python library and Grasshopper toolbox for indoor CO2 CFD simulation [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.17117827
+  Huang, Q., Langenbeck, A., Frisch, J., & van Treeck, C. (2026). Carbonfly: An easy-to-use Python library and Grasshopper toolbox for CO₂-based indoor airflow and air quality CFD simulation. SoftwareX, 102580. https://doi.org/10.1016/j.softx.2026.102580
   ```
 
-- If you wish to cite **Carbonfly** for its design, methodology, etc. (rather than a specific release), please cite our paper:
+- If your work depends on a specific release of Carbonfly, please additionally cite the archived Zenodo version corresponding to the release you used. Each release is archived on [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17117827.svg)](https://doi.org/10.5281/zenodo.17117827). Please either cite the version you used as indexed at Zenodo (for reproducibility) or cite all versions.
 
-  Coming soon...
+  **Examples:**
+
+  BibTeX:
+  ```bibtex
+  @misc{Carbonfly_Zenodo_Huang,
+    author    = {Qirui Huang},
+    title     = {{Carbonfly}: {An} easy-to-use {Python} library and {Grasshopper} toolbox for {CO}$_2$-based indoor airflow and air quality {CFD} simulation},
+    year      = {2025},
+    publisher = {Zenodo},
+    url       = {https://github.com/RWTH-E3D/carbonfly},
+    doi       = {10.5281/zenodo.17117827},
+  }
+  ```
+  
+  APA style:
+  ```
+  Huang, Q. (2025). Carbonfly: An easy-to-use Python library and Grasshopper toolbox for CO₂-based indoor airflow and air quality CFD simulation [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.17117827
+  ```
+  
+  BibTeX (version-specific):
+  ```bibtex
+  @misc{Carbonfly_Zenodo_Huang,
+    author    = {Qirui Huang},
+    title     = {{Carbonfly}: {An} easy-to-use {Python} library and {Grasshopper} toolbox for {CO}$_2$-based indoor airflow and air quality {CFD} simulation (Version v0.8.0)},
+    year      = {2025},
+    note      = {Zenodo}
+    url       = {https://doi.org/10.5281/zenodo.17504360},
+    doi       = {10.5281/zenodo.17504360},
+  }
+  ```
+  
+  APA style (version-specific):
+  ```
+  Huang, Q. (2025). Carbonfly: An easy-to-use Python library and Grasshopper toolbox for CO₂-based indoor airflow and air quality CFD simulation (Version 0.8.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.17504360
+  ```
+
+  > ⚠️ Replace the version and DOI with those of the exact release you used.
+
 
 [Back to top ↥](#quick-navigation)
 

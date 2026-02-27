@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: "Carbonfly: An easy-to-use Python library and Grasshopper toolbox for CO₂-based indoor airflow and air quality CFD simulation"
+message: "If you use Carbonfly in your research, please cite the SoftwareX article."
+type: software
+
+authors:
+  - family-names: Huang
+    given-names: Qirui
+
+doi: 10.5281/zenodo.17117827
+repository-code: "https://github.com/RWTH-E3D/carbonfly"
+license: "LGPL-3.0"
+url: "https://github.com/RWTH-E3D/carbonfly"
+
+preferred-citation:
+  type: article
+  title: "Carbonfly: An easy-to-use Python library and Grasshopper toolbox for CO₂-based indoor airflow and air quality CFD simulation"
+  journal: "SoftwareX"
+  year: 2026
+  volume: 34
+  doi: 10.1016/j.softx.2026.102580
+  authors:
+    - family-names: Huang
+      given-names: Qirui
+    - family-names: Langenbeck
+      given-names: Anna
+    - family-names: Frisch
+      given-names: Jérôme
+    - family-names: van Treeck
+      given-names: Christoph
